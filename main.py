@@ -38,7 +38,45 @@ def mutate(individual):
     )
 def create_population():
     return [generate_individual() for _ in range(POPULATION_SIZE)]
+
 def evolve():
     population = create_population()
     max_fitness_per_generation = []
     avg_fitness_per_generation = []
+
+    for generation in range(NUM_GENERATIONS):
+        new_population = []
+        total_fitness = 0
+
+        while len(new_population) < POPULATION_SIZE:
+            parent1 = tournament_selection(population)
+            parent2 = tournament_selection(population)
+            child1, child2 = crossover(parent1, parent2)
+            child1 = mutate(child1)
+            child2 = mutate(child2)
+            new_population.extend([child1, child2])
+        population = new_population[:POPULATION_SIZE]
+        fitness_values = [fitness(ind) for ind in population]
+        max_fitness = max(fitness_values)
+        avg_fitness = sum(fitness_values) / len(fitness_values)
+        max_fitness_per_generation.append(max_fitness)
+        avg_fitness_per_generation.append(avg_fitness)
+        print(f"Generation {generation + 1} - Max Fitness: {max_fitness} Avg Fitness: {avg_fitness:.2f}")
+
+
+        if max_fitness == GENOME_LENGTH:
+            print("Target string matched!")
+            break
+
+
+    plot_fitness(max_fitness_per_generation, avg_fitness_per_generation)
+def plot_fitness(max_fitness, avg_fitness):
+    generations = range(1, len(max_fitness) + 1)
+    plt.plot(generations, max_fitness, label="Max Fitness")
+    plt.plot(generations, avg_fitness, label="Avg Fitness")
+    plt.xlabel("Generations")
+    plt.ylabel("Fitness")
+    plt.title("Fitness Progress Over Generations")
+    plt.legend()
+    plt.show()
+evolve()
